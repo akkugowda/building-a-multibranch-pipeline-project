@@ -1,66 +1,50 @@
 pipeline {
-    agent any
-    
-    environment {
-        // Define environment variables here
-    }
-    
+    agent any 
     stages {
         stage('Build') {
             steps {
-                // Build steps (e.g., compile code)
-                sh 'make'
+                sh 'npm install'
             }
         }
-        
         stage('Test') {
             steps {
-                // Testing steps (e.g., run unit tests)
-                sh 'make test'
+                sh './jenkins/scripts/test.sh'
             }
         }
-        
-        stage('Deploy to Development') {
+        stage('Deliver for development') {
             when {
-                branch 'develop'
+                branch 'development'
             }
             steps {
-                // Deployment steps for development
-                sh './deploy.sh dev'
+                sh './jenkins/scripts/deliver-for-development.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
             }
         }
-        
-        stage('Deploy to Staging') {
+         stage('Deliver for staging') {
             when {
-                branch 'main'
+                branch 'staging'
             }
             steps {
-                // Deployment steps for staging
-                sh './deploy.sh staging'
+                sh './jenkins/scripts/deliver-for-development.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
             }
         }
-        
-        stage('Deploy to Production') {
+        stage('Deploy for production') {
             when {
-                branch 'release'
+                branch 'production'
             }
             steps {
-                // Deployment steps for production
-                input message: 'Approve Deployment to Production?'
-                sh './deploy.sh prod'
+                sh './jenkins/scripts/deploy-for-production.sh'
+                input message: 'Finished using the web site? (Click "Proceed" to continue)'
+                sh './jenkins/scripts/kill.sh'
             }
-        }
-    }
-    
-    post {
-        always {
-            // Cleanup or notifications
-        }
-        success {
-            // Actions on success
-        }
-        failure {
-            // Actions on failure
         }
     }
 }
+
+    
+  
+              
+               
